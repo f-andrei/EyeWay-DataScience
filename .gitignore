@@ -1,0 +1,40 @@
+# Compiled files
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.dll
+*.exe
+
+# Byte-compiled files
+__pycache__/
+
+# Logs and databases
+*.log
+*.sqlite3
+
+# Environment variables
+.env
+
+# IDE files
+.vscode/
+.idea/
+
+# Dependency directories
+venv/
+node_modules/
+
+# Compiled output
+dist/
+build/
+*.egg-info/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# Ignore personal configuration files
+config.ini
+secrets.ini
