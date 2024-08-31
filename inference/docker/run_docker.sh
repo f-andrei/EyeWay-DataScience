@@ -1,0 +1,1 @@
+sudo docker run -it --privileged --rm -p 8554:8554 --name=deepstream --net=host --gpus all -e DISPLAY=$DISPLAY -e CUDA_CACHE_DISABLE=0 --device /dev/snd -v /tmp/.X11-unix/:/tmp/.X11-unix -v /home/andrei/deepstream:/opt/nvidia/deepstream/deepstream/sources deepstream_py2
