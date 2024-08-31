@@ -2,9 +2,9 @@ import sys
 import gi # type: ignore
 from .element_links import link_elements
 from .elements import get_elements
-from .properties import set_osd_properties, set_pgie_properties, set_streammux_properties, set_tiler_properties, set_tracker_properties
+from .properties import set_output_properties, set_pgie_properties, set_streammux_properties, set_tiler_properties, set_tracker_properties
 gi.require_version('Gst', '1.0')
-from gi.repository import Gst # type: ignore
+from gi.repository import Gst, GstRtspServer, GstRtsp # type: ignore
 from common.platform_info import PlatformInfo
 from common.FPS import PERF_DATA
 import configparser
@@ -14,14 +14,6 @@ from configs.constants import *
 frame_count = {}
 saved_count = {}
 perf_data = None
-
-
-no_display = False
-silent = False
-file_loop = False
-g_on = True
-a = None
-
 
 
 def cb_newpad(decodebin, decoder_src_pad,data):
@@ -60,7 +52,6 @@ def decodebin_child_added(child_proxy, Object, name, user_data):
         if source_element.find_property('drop-on-latency') != None:
             Object.set_property("drop-on-latency", True)
 
-
 def create_source_bin(index, uri):
     print("Creating source bin")
 
@@ -86,16 +77,47 @@ def create_source_bin(index, uri):
         return None
     return nbin
 
+def create_rtsp_server():
+    rtsp_port_num = 8554
+    rtsp_stream_end = "/live"
+    username =  'user'
+    password =  "pass"
+    updsink_port_num = 8245
+    codec = 'H264'
+
+    server = GstRtspServer.RTSPServer.new()
+    server.props.service = "%d" % rtsp_port_num
+    server.attach(None)
+
+    factory = GstRtspServer.RTSPMediaFactory.new()
+    factory.set_protocols(GstRtsp.RTSPLowerTrans.TCP)
+    factory.set_transport_mode(GstRtspServer.RTSPTransportMode.PLAY)
+    factory.set_latency(1)
+    factory.set_launch(
+        '( udpsrc name=pay0  port=%d buffer-size=10485760  caps="application/x-rtp, media=video, clock-rate=90000, mtu=1300, encoding-name=(string)%s, payload=96 " )'
+        % (updsink_port_num, codec)
+    )
+    factory.set_shared(True)
+    permissions = GstRtspServer.RTSPPermissions()
+    permissions.add_permission_for_role(username, "media.factory.access", True)
+    permissions.add_permission_for_role(username, "media.factory.construct", True)
+    factory.set_permissions(permissions)
+    server.get_mount_points().add_factory(rtsp_stream_end, factory)
+    print("\n Transmissão rtsp inicializada em: rtsp://%s:%s@%s:%d%s \n\n" %
+        (username, password, 'localhost', rtsp_port_num, rtsp_stream_end))
+
 # Function to create the pipeline
 def create_pipeline(args):
-    
+    print(args)
+    stream_output = args.output
+
     global platform_info
     platform_info = PlatformInfo()
     
-    number_sources=len(args)-1
+    number_sources=len(args.input)
     
     global perf_data
-    perf_data = PERF_DATA(len(args) - 1)
+    perf_data = PERF_DATA(len(args.input))
 
     Gst.init(None)
     
@@ -104,8 +126,7 @@ def create_pipeline(args):
         sys.stderr.write("Unable to create Pipeline\n")
         return None
 
-    elements = get_elements()
-
+    elements = get_elements(args.output)
     for name, val in elements.items():
         element = Gst.ElementFactory.make(val[0], val[1])
         if not element:
@@ -149,17 +170,17 @@ def create_pipeline(args):
     streammux = set_streammux_properties(elements)
 
     set_pgie_properties(elements, number_sources)
-    set_osd_properties(elements)
+    set_output_properties(elements, stream_output, number_sources)
 
     for element in elements.values():
         pipeline.add(element)
-    pipeline.add(sink)
 
 
     for i in range(number_sources):
         # os.mkdir(folder_name + "/stream_" + str(i))
         print("Creating source_bin ", i, " \n ")
-        uri_name = args[i + 1]
+        uri_name = args.input[i]
+        print("uri_name", uri_name)
         if uri_name.find("rtsp://") == 0:
             is_live = True
         source_bin = create_source_bin(i, uri_name)
@@ -176,6 +197,6 @@ def create_pipeline(args):
         srcpad.link(sinkpad)
 
 
-    elements = link_elements(elements, sink)
+    elements, element_probe = link_elements(elements, stream_output)
 
-    return pipeline, elements["nvdsanalytics"], perf_data
+    return pipeline, elements["nvdsanalytics"], perf_data, element_probe

@@ -1,10 +1,10 @@
 from configs.constants import *
 import math
-import os
-
+import gi # type: ignore
+gi.require_version('Gst', '1.0')
+from gi.repository import Gst # type: ignore
 
 def set_tracker_properties(config, elements):
-    print(config)
     tracker = elements["nvtracker"]
     for key in config['tracker']:
         if key == 'tracker-width':
@@ -57,9 +57,39 @@ def set_pgie_properties(elements, number_sources):
 
     return pgie
 
-def set_osd_properties(elements):
-    nvosd = elements["nvosd"]
-    nvosd.set_property('process-mode', OSD_PROCESS_MODE)
-    nvosd.set_property('display-text', OSD_DISPLAY_TEXT)
+def set_output_properties(elements, stream_output, number_sources):
+    if stream_output == "none":
+        elements["sink"].set_property('enable-last-sample', 0)
+        elements["sink"].set_property('sync', 0)
+    
+    if stream_output in ("file", "rtsp", "display"):
+        elements["filter_tiler"].set_property("caps", Gst.Caps.from_string("video/x-raw(memory:NVMM), format=RGBA"))
+        tiler_rows=int(math.sqrt(number_sources))
+        tiler_columns=int(math.ceil((1.0*number_sources)/tiler_rows))
+        elements["nvtiler"].set_property("rows",tiler_rows)
+        elements["nvtiler"].set_property("columns",tiler_columns)
+        elements["nvtiler"].set_property("width", TILED_OUTPUT_WIDTH)
+        elements["nvtiler"].set_property("height", TILED_OUTPUT_HEIGHT)
 
-    return nvosd
+        elements["nvosd"].set_property('process-mode',OSD_PROCESS_MODE)
+        elements["nvosd"].set_property('display-text',OSD_DISPLAY_TEXT)
+
+        if stream_output in ("file", "rtsp"):
+            elements["filter_encoder"].set_property("caps", Gst.Caps.from_string("video/x-raw(memory:NVMM), format=I420"))
+            elements["encoder"].set_property('bitrate', 4097152)
+
+            if stream_output == "file":
+                elements["sink"].set_property('location', 'output_file.mp4')
+                elements["sink"].set_property('sync', 1)
+            
+            if stream_output == "rtsp":
+                elements["sink"].set_property('host', "127.0.0.1")
+                elements["sink"].set_property('port', 8245)
+                elements["sink"].set_property('async', False)
+                elements["sink"].set_property('sync', 1)
+
+    return elements
+
+
+
+ 

@@ -1,14 +1,35 @@
 
 
-def link_elements(elements, sink):
-    elements["streammux"].link(elements["pgie"])
-    elements["pgie"].link(elements["nvvidconv"])
-    elements["nvvidconv"].link(elements["filter1"])
-    elements["filter1"].link(elements["nvtracker"])
-    elements["nvtracker"].link(elements["nvdsanalytics"])
-    elements["nvdsanalytics"].link(elements["nvtiler"])
-    elements["nvtiler"].link(elements["nvvidconv2"])
-    elements["nvvidconv2"].link(elements["nvosd"])
-    elements["nvosd"].link(sink)
+def link_elements(elements, stream_output):
+    print("stream_output", stream_output)
+    if stream_output == "none":
+        element_probe = elements["pgie"]
+        elements["pgie"].link(elements["sink"])
 
-    return elements
+    if stream_output in ("file", "rtsp", "display"):
+        element_probe = elements["nvtiler"]
+        elements["streammux"].link(elements["pgie"])
+        elements["pgie"].link(elements["nvvidconv"])
+        elements["nvvidconv"].link(elements["filter1"])
+        elements["filter1"].link(elements["nvtracker"])
+        elements["nvtracker"].link(elements["nvdsanalytics"])
+        elements["nvdsanalytics"].link(elements["nvtiler"])
+        elements["nvtiler"].link(elements["nvvidconv2"])
+        elements["nvvidconv2"].link(elements["nvosd"])
+        if stream_output in ("file", "rtsp"):
+            elements["nvosd"].link(elements["nvvidconv_encoder"])
+            elements["nvvidconv_encoder"].link(elements["filter_encoder"])
+            elements["filter_encoder"].link(elements["encoder"])
+            if stream_output == "file":
+                elements["encoder"].link(elements["codeparser"])
+                elements["codeparser"].link(elements["container"])
+                elements["container"].link(elements["sink"])
+            if stream_output == "rtsp":
+                elements["encoder"].link(elements["rtppay"])
+                elements["rtppay"].link(elements["sink"])
+        
+        else:
+            elements["nvosd"].link(elements["sink"])
+
+
+    return elements, element_probe
