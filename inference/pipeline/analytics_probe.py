@@ -1,9 +1,9 @@
 
 import pyds # type: ignore
-from inference.configs.constants import *
+from configs.constants import *
 from gi.repository import GLib, Gst # type: ignore
 
-def nvanalytics_src_pad_buffer_probe(pad, info, u_data):
+def nvanalytics_src_pad_buffer_probe(pad, info, u_data, perf_data):
     people_count = 0
     frame_number=0
     num_rects=0
@@ -106,9 +106,8 @@ def nvanalytics_src_pad_buffer_probe(pad, info, u_data):
 
         py_nvosd_text_params.text_bg_clr.set(0.0, 0.0, 0.0, 1.0)
         pyds.nvds_add_display_meta_to_frame(frame_meta, display_meta)
-        # stream_index = "stream{0}".format(frame_meta.pad_index)
-        # global perf_data
-        # perf_data.update_fps(stream_index)
+        stream_index = "stream{0}".format(frame_meta.pad_index)
+        perf_data.update_fps(stream_index)
 
 
         try:

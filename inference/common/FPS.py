@@ -60,7 +60,7 @@ class PERF_DATA:
 
     def perf_print_callback(self):
         self.perf_dict = {stream_index:stream.get_fps() for (stream_index, stream) in self.all_stream_fps.items()}
-        print ("\n**PERF: ", self.perf_dict, "\n")
+        print ("\nFPS: ", self.perf_dict, "\n")
         return True
     
     def update_fps(self, stream_index):

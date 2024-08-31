@@ -1,9 +1,10 @@
-from inference.configs.constants import *
+from configs.constants import *
 import math
 import os
 
 
 def set_tracker_properties(config, elements):
+    print(config)
     tracker = elements["nvtracker"]
     for key in config['tracker']:
         if key == 'tracker-width':

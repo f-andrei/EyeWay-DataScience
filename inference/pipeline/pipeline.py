@@ -1,19 +1,14 @@
 import sys
-import math
 import gi # type: ignore
-import threading
-from inference.pipeline.element_links import link_elements
-from inference.pipeline.elements import get_elements
-from inference.pipeline.properties import set_osd_properties, set_pgie_properties, set_streammux_properties, set_tiler_properties, set_tracker_properties
+from .element_links import link_elements
+from .elements import get_elements
+from .properties import set_osd_properties, set_pgie_properties, set_streammux_properties, set_tiler_properties, set_tracker_properties
 gi.require_version('Gst', '1.0')
-from gi.repository import GLib, Gst # type: ignore
-import pyds # type: ignore
+from gi.repository import Gst # type: ignore
 from common.platform_info import PlatformInfo
-from common.bus_call import bus_call
 from common.FPS import PERF_DATA
 import configparser
-from inference.configs.constants import *
-from inference.pipeline.analytics_probe import nvanalytics_src_pad_buffer_probe
+from configs.constants import *
 
 
 frame_count = {}
@@ -136,14 +131,15 @@ def create_pipeline(args):
 
 
     config = configparser.ConfigParser()
-    config.read('dsnvanalytics_tracker_config.txt')
+    print("TRACKER_CONFIG_FILE", TRACKER_CONFIG_FILE)
+    config.read(TRACKER_CONFIG_FILE)
     config.sections()
 
     config, elements = set_tracker_properties(config, elements)
     
     elements["nvdsanalytics"].set_property("config-file", ANALYTICS_CONFIG_FILE)
 
-    tiler = set_tiler_properties(elements, number_sources, sink, caps1)
+    tiler = set_tiler_properties(elements, number_sources)
 
     sink.set_property("qos", 0)
 
@@ -182,39 +178,4 @@ def create_pipeline(args):
 
     elements = link_elements(elements, sink)
 
-    return pipeline, elements["nvdsanalytics"]
-
-# Function to run the pipeline
-def run_pipeline(args):
-    pipeline, analytics = create_pipeline(args)
-    if not pipeline:
-        sys.stderr.write("Failed to create pipeline\n")
-        return
-
-
-    loop = GLib.MainLoop()
-    bus = pipeline.get_bus()
-    bus.add_signal_watch()
-    bus.connect ("message", bus_call, loop)
-
-    nvanalytics_src_pad=analytics.get_static_pad("src")
-    if not nvanalytics_src_pad:
-        sys.stderr.write(" Unable to get src pad \n")
-    else:
-        nvanalytics_src_pad.add_probe(Gst.PadProbeType.BUFFER, nvanalytics_src_pad_buffer_probe, 0)
-        # perf callback function to print fps every 5 sec
-        GLib.timeout_add(5000, perf_data.perf_print_callback)
-
-    print("Starting pipeline \n")
-    pipeline.set_state(Gst.State.PLAYING)
-
-    try:
-        loop.run()
-    except Exception as e:
-        raise e
-        # pass
-
-    pipeline.set_state(Gst.State.NULL)
-
-if __name__ == '__main__':
-    run_pipeline(sys.argv)
+    return pipeline, elements["nvdsanalytics"], perf_data

@@ -1,8 +1,7 @@
 
 
 def link_elements(elements, sink):
-    elements["streammux"].link(elements["nvdspreprocess"])
-    elements["nvmultiurisrcbin"].link(elements["nvdspreprocess"])
+    elements["streammux"].link(elements["pgie"])
     elements["pgie"].link(elements["nvvidconv"])
     elements["nvvidconv"].link(elements["filter1"])
     elements["filter1"].link(elements["nvtracker"])
