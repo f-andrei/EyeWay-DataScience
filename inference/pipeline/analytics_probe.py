@@ -10,18 +10,26 @@ platform_info = PlatformInfo()
 saved_objects = {}
 
 
-def save_image(frame, object_id):
+def save_image(gst_buffer, frame_meta, object_id):
+
+    n_frame = pyds.get_nvds_buf_surface(hash(gst_buffer), frame_meta.batch_id)
+    # n_frame = draw_bounding_boxes(n_frame, obj_meta, obj_meta.confidence)
+    # convert python array into numpy array format in the copy mode.
+    frame_copy = np.array(n_frame, copy=True, order='C')
+    # convert the array into cv2 default color format
+    frame_copy = cv2.cvtColor(frame_copy, cv2.COLOR_RGBA2BGRA)
+
     if object_id not in saved_objects:
         saved_objects[object_id] = 0
     if saved_objects[object_id] < 5:
-        cv2.imwrite("object_{0}_frame_{1}.jpg".format(object_id, saved_objects[object_id]), frame)
+        cv2.imwrite("object_{0}_frame_{1}.jpg".format(object_id, saved_objects[object_id]), frame_copy)
         saved_objects[object_id] += 1
 
 
 def nvanalytics_src_pad_buffer_probe(pad, info, u_data, perf_data):
     people_count = 0
-    frame_number=0
-    num_rects=0
+    frame_number = 0
+    num_rects = 0
     gst_buffer = info.get_buffer()
     if not gst_buffer:
         print("Unable to get GstBuffer ")
@@ -52,15 +60,9 @@ def nvanalytics_src_pad_buffer_probe(pad, info, u_data, perf_data):
                 obj_meta=pyds.NvDsObjectMeta.cast(l_obj.data)
             except StopIteration:
                 break
-
-            n_frame = pyds.get_nvds_buf_surface(hash(gst_buffer), frame_meta.batch_id)
-            # n_frame = draw_bounding_boxes(n_frame, obj_meta, obj_meta.confidence)
-            # convert python array into numpy array format in the copy mode.
-            frame_copy = np.array(n_frame, copy=True, order='C')
-            # convert the array into cv2 default color format
-            frame_copy = cv2.cvtColor(frame_copy, cv2.COLOR_RGBA2BGRA)
-
+            
             l_user_meta = obj_meta.obj_user_meta_list
+            
             # Extract object level meta data from NvDsAnalyticsObjInfo
             while l_user_meta:
                 try:
@@ -69,7 +71,7 @@ def nvanalytics_src_pad_buffer_probe(pad, info, u_data, perf_data):
                         user_meta_data = pyds.NvDsAnalyticsObjInfo.cast(user_meta.user_meta_data)                  
                         if user_meta_data.lcStatus: 
                             print("Object {0} line crossing status: {1}".format(obj_meta.object_id, user_meta_data.lcStatus))
-                            save_image(frame_copy, obj_meta.object_id)
+                            save_image(gst_buffer, frame_meta, obj_meta.object_id)
                 except StopIteration:
                     break
 
