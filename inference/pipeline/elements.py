@@ -1,15 +1,13 @@
-
-
-
 def get_elements(stream_output):
     elements ={
             "streammux": ("nvstreammux", "Stream-muxer"),
             "pgie": ("nvinfer", "primary-inference"),
-            "nvvidconv": ("nvvideoconvert", "convertor"),
+            "nvvidconv1": ("nvvideoconvert", "convertor1"),
             "filter1": ("capsfilter", "filter1"),
             "nvtracker": ("nvtracker", "tracker"),
             "nvdsanalytics": ("nvdsanalytics", "analytics"),
-            "nvvidconv2": ("nvvideoconvert", "convertor2"),
+            # "nvvidconv": ("nvvideoconvert", "convertor"),
+            "nvtiler": ("nvmultistreamtiler", "nvtiler")
         }
 
 
@@ -17,9 +15,10 @@ def get_elements(stream_output):
         elements["sink"] = ("fakesink", "fakesink")
 
     if stream_output in ("file", "rtsp", "display"):
-        elements["nvvidconv_tiler"] = ("nvvideoconvert", "nvvidconv_tiler")
-        elements["filter_tiler"] = ("capsfilter", "filter_tiler")
-        elements["nvtiler"] = ("nvmultistreamtiler", "nvtiler")
+        # elements["nvvidconv_tiler"] = ("nvvideoconvert", "nvvidconv_tiler")
+        # elements["filter_tiler"] = ("capsfilter", "filter_tiler")
+        # elements["nvtiler"] = ("nvmultistreamtiler", "nvtiler")
+        elements["nvvidconv"] = ("nvvideoconvert", "convertor")
         elements["nvosd"] = ("nvdsosd", "onscreendisplay")
         if stream_output in ("file","rtsp"):
             elements["nvvidconv_encoder"] = ("nvvideoconvert", "nvvidconv_encoder")

@@ -9,6 +9,7 @@ from common.platform_info import PlatformInfo
 from common.FPS import PERF_DATA
 import configparser
 from configs.constants import *
+import pyds # type: ignore
 
 
 frame_count = {}
@@ -68,7 +69,6 @@ def create_source_bin(index, uri):
     uri_decode_bin.set_property("uri", uri)
     uri_decode_bin.connect("pad-added", cb_newpad, nbin)
     uri_decode_bin.connect("child-added", decodebin_child_added, nbin)
-    # uri_decode_bin.set_property("")
 
     Gst.Bin.add(nbin,uri_decode_bin)
     bin_pad=nbin.add_pad(Gst.GhostPad.new_no_target("src",Gst.PadDirection.SRC))
@@ -108,7 +108,6 @@ def create_rtsp_server():
 
 # Function to create the pipeline
 def create_pipeline(args):
-    print(args)
     stream_output = args.output
 
     global platform_info
@@ -152,7 +151,6 @@ def create_pipeline(args):
 
 
     config = configparser.ConfigParser()
-    print("TRACKER_CONFIG_FILE", TRACKER_CONFIG_FILE)
     config.read(TRACKER_CONFIG_FILE)
     config.sections()
 
@@ -166,7 +164,24 @@ def create_pipeline(args):
 
     caps1 = Gst.Caps.from_string("video/x-raw(memory:NVMM), format=RGBA")
     elements["filter1"].set_property("caps", caps1)
-    
+    if not platform_info.is_integrated_gpu():
+        # Use CUDA unified memory in the pipeline so frames
+        # can be easily accessed on CPU in Python.
+        vc_mem_type = int(pyds.NVBUF_MEM_CUDA_PINNED)
+        mem_type = int(pyds.NVBUF_MEM_CUDA_UNIFIED)
+        elements["streammux"].set_property("nvbuf-memory-type", vc_mem_type)
+        elements["nvvidconv"].set_property("nvbuf-memory-type", mem_type)
+        if platform_info.is_wsl():
+            #opencv functions like cv2.line and cv2.putText is not able to access NVBUF_MEM_CUDA_UNIFIED memory
+            #in WSL systems due to some reason and gives SEGFAULT. Use NVBUF_MEM_CUDA_PINNED memory for such
+            #usecases in WSL. Here, nvvidconv1's buffer is used in tiler sink pad probe and cv2 operations are
+            #done on that.
+            vc_vc_mem_type = int(pyds.NVBUF_MEM_CUDA_PINNED)
+            print("using nvbuf_mem_cuda_pinned memory for nvvidconv1\n", vc_mem_type)
+            elements["nvvidconv1"].set_property("nvbuf-memory-type", vc_mem_type)
+        else:
+            elements["nvvidconv1"].set_property("nvbuf-memory-type", vc_mem_type)
+        tiler.set_property("nvbuf-memory-type", vc_mem_type)
     streammux = set_streammux_properties(elements)
 
     set_pgie_properties(elements, number_sources)
@@ -177,10 +192,8 @@ def create_pipeline(args):
 
 
     for i in range(number_sources):
-        # os.mkdir(folder_name + "/stream_" + str(i))
         print("Creating source_bin ", i, " \n ")
         uri_name = args.input[i]
-        print("uri_name", uri_name)
         if uri_name.find("rtsp://") == 0:
             is_live = True
         source_bin = create_source_bin(i, uri_name)
@@ -195,7 +208,6 @@ def create_pipeline(args):
         if not srcpad:
             sys.stderr.write("Unable to create src pad bin \n")
         srcpad.link(sinkpad)
-
 
     elements, element_probe = link_elements(elements, stream_output)
 

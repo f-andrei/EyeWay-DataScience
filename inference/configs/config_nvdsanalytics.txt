@@ -1,55 +1,23 @@
 [property]
 enable=1
-config-width=1280
-config-height=720
+config-width=1920
+config-height=1080
 osd-mode=2
 display-font-size=12
 
-[roi-filtering-stream-0]
-enable=1
-roi-road-left=355;25;471;33;627;219;702;416;741;716;9;713;4;619;179;401;312;234;341;133
-roi-road-right=775;713;875;521;1012;398;1220;300;1279;342;1277;385;1176;475;1124;562;1081;713
-roi-shoulder=460;19;633;223;703;412;743;710;770;713;865;537;1011;403;1219;302;1156;246;1011;288;869;345;854;360;782;337;750;330;644;153;546;68;497;33
-roi-parked=344;100;323;208;254;205;294;96
 
+
+#Line crossing - <label> = <direction xyxys> <line xyxys>
 [line-crossing-stream-0]
 enable=1
-#Line crossing - <label> = <direction xyxys> <line xyxys>
-line-crossing-sidewalk-left-down=204;223;173;262;124;234;231;248
-line-crossing-sidewalk-left-up=173;262;204;223;124;234;231;248
-line-crossing-sidewalk-right-down=1230;673;1224;722;1175;692;1278;703
-line-crossing-sidewalk-right-up=1224;722;1230;673;1175;692;1278;703
-line-crossing-left-lane=1047;491;1018;532;488;210;323;213
-line-crossing-middle-lane=576;203;585;239;536;217;625;217
-line-crossing-right-lane=412;194;400;231;934;473;1129;548
-class-id=0;2;3;5;7
-#extended when 0- only counts crossing on the configured Line
-#              1- assumes extended Line crossing counts all the crossing
-extended=0
-#LC modes supported:
-#loose   : counts all crossing without strong adherence to direction
-#balanced: Strict direction adherence expected compared to mode=loose
-#strict  : Strict direction adherence expected compared to mode=balanced
-mode=strict
+line-crossing- rightLane1 = 616;460; 558;421; 638;428; 526;452
+line-crossing- leftLane1 = 390;450; 428;503; 350;495; 464;465
+line-crossing- rightLane2 = 1563;563; 1624;521; 1537;521; 1647;571
+line-crossing- leftLane2 = 1415;441; 1332;476; 1313;442; 1432;482
 
-[line-crossing-stream-1]
-enable=1
-#Line crossing - <label> = <direction xyxys> <line xyxys>
-line-crossing-sidewalk-left-down=204;223;173;262;124;234;231;248
-line-crossing-sidewalk-left-up=173;262;204;223;124;234;231;248
-line-crossing-sidewalk-right-down=1230;673;1224;722;1175;692;1278;703
-line-crossing-sidewalk-right-up=1224;722;1230;673;1175;692;1278;703
-line-crossing-left-lane=1047;491;1018;532;488;210;323;213
-line-crossing-middle-lane=576;203;585;239;536;217;625;217
-line-crossing-right-lane=412;194;400;231;934;473;1129;548
 class-id=0;2;3;5;7
-#extended when 0- only counts crossing on the configured Line
-#              1- assumes extended Line crossing counts all the crossing
-extended=0
-#LC modes supported:
-#loose   : counts all crossing without strong adherence to direction
-#balanced: Strict direction adherence expected compared to mode=loose
-#strict  : Strict direction adherence expected compared to mode=balanced
+
+
 mode=strict
 
 

@@ -36,6 +36,7 @@ def set_tiler_properties(elements, number_sources):
     tiler.set_property("width", TILED_OUTPUT_WIDTH)
     tiler.set_property("height", TILED_OUTPUT_HEIGHT)
 
+
     return tiler
 
 
@@ -45,7 +46,7 @@ def set_streammux_properties(elements):
     streammux.set_property('height', 1080)
     streammux.set_property('batch-size', 1)
     streammux.set_property('batched-push-timeout', MUXER_BATCH_TIMEOUT_USEC)
-    streammux.set_property('nvbuf-memory-type', 2)
+    # streammux.set_property('nvbuf-memory-type', 2)
 
     return streammux
     
@@ -63,7 +64,7 @@ def set_output_properties(elements, stream_output, number_sources):
         elements["sink"].set_property('sync', 0)
     
     if stream_output in ("file", "rtsp", "display"):
-        elements["filter_tiler"].set_property("caps", Gst.Caps.from_string("video/x-raw(memory:NVMM), format=RGBA"))
+        # elements["filter_tiler"].set_property("caps", Gst.Caps.from_string("video/x-raw(memory:NVMM), format=RGBA"))
         tiler_rows=int(math.sqrt(number_sources))
         tiler_columns=int(math.ceil((1.0*number_sources)/tiler_rows))
         elements["nvtiler"].set_property("rows",tiler_rows)
