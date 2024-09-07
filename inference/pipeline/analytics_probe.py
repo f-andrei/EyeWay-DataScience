@@ -10,19 +10,64 @@ platform_info = PlatformInfo()
 saved_objects = {}
 
 
-def save_image(gst_buffer, frame_meta, object_id):
+class_names = ["person","bicycle","car","motorbike","aeroplane","bus","train","truck"]
 
+def draw_bounding_boxes(image, obj_meta, text):
+    class_id = obj_meta.class_id
+    rect_params = obj_meta.rect_params
+    top = int(rect_params.top)
+    left = int(rect_params.left)
+    width = int(rect_params.width)
+    height = int(rect_params.height)
+    # image = cv2.rectangle(image, (left, top), (left + width, top + height), (0, 0, 255, 0), 2, cv2.LINE_4)
+    color = (0, 0, 255, 0)
+    w_percents = int(width * 0.05) if width > 100 else int(width * 0.1)
+    h_percents = int(height * 0.05) if height > 100 else int(height * 0.1)
+    linetop_c1 = (left + w_percents, top)
+    linetop_c2 = (left + width - w_percents, top)
+    image = cv2.line(image, linetop_c1, linetop_c2, color, 6)
+    linebot_c1 = (left + w_percents, top + height)
+    linebot_c2 = (left + width - w_percents, top + height)
+    image = cv2.line(image, linebot_c1, linebot_c2, color, 6)
+    lineleft_c1 = (left, top + h_percents)
+    lineleft_c2 = (left, top + height - h_percents)
+    image = cv2.line(image, lineleft_c1, lineleft_c2, color, 6)
+    lineright_c1 = (left + width, top + h_percents)
+    lineright_c2 = (left + width, top + height - h_percents)
+    image = cv2.line(image, lineright_c1, lineright_c2, color, 6)
+    image = cv2.putText(image,
+                        text,
+                        (left, top - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        1,
+                        (255, 255, 255, 0),
+                        2)
+    # Note that on some systems cv2.putText erroneously draws horizontal lines across the image
+    image = cv2.putText(
+        image, 
+        f"{class_names[class_id]}", 
+        (left - 10, top - 10), 
+        cv2.FONT_HERSHEY_SIMPLEX, 
+        1,
+        (255, 255, 255, 0),
+        2
+    )
+    return image
+
+def save_image(gst_buffer, frame_meta, obj_meta, lane, text):
+    class_id = obj_meta.class_id
+    object_id = obj_meta.object_id
     n_frame = pyds.get_nvds_buf_surface(hash(gst_buffer), frame_meta.batch_id)
     # n_frame = draw_bounding_boxes(n_frame, obj_meta, obj_meta.confidence)
     # convert python array into numpy array format in the copy mode.
     frame_copy = np.array(n_frame, copy=True, order='C')
     # convert the array into cv2 default color format
     frame_copy = cv2.cvtColor(frame_copy, cv2.COLOR_RGBA2BGRA)
-
+    frame_copy = draw_bounding_boxes(frame_copy, obj_meta, text)
     if object_id not in saved_objects:
         saved_objects[object_id] = 0
     if saved_objects[object_id] < 5:
-        cv2.imwrite("object_{0}_frame_{1}.jpg".format(object_id, saved_objects[object_id]), frame_copy)
+        cv2.imwrite(f"infractions/{class_names[class_id]}_{object_id}_{lane[0].strip()}.jpg", frame_copy)
         saved_objects[object_id] += 1
 
 
@@ -71,7 +116,8 @@ def nvanalytics_src_pad_buffer_probe(pad, info, u_data, perf_data):
                         user_meta_data = pyds.NvDsAnalyticsObjInfo.cast(user_meta.user_meta_data)                  
                         if user_meta_data.lcStatus: 
                             print("Object {0} line crossing status: {1}".format(obj_meta.object_id, user_meta_data.lcStatus))
-                            save_image(gst_buffer, frame_meta, obj_meta.object_id)
+                            text = "Conversão proibida"
+                            save_image(gst_buffer, frame_meta, obj_meta, user_meta_data.lcStatus, text)
                 except StopIteration:
                     break
 
