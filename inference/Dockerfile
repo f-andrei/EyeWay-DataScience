@@ -14,6 +14,9 @@ RUN apt-get update && apt-get install -y \
     python3-gst-1.0 \
     python3-opencv \
     python3-numpy \
+    ffmpeg \
+    nginx \
+    lsof \
     libgstrtspserver-1.0-0 gstreamer1.0-rtsp \
     libgirepository1.0-dev \
     gobject-introspection gir1.2-gst-rtsp-server-1.0 \
