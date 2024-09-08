@@ -11,6 +11,6 @@ OSD_DISPLAY_TEXT= 1
 MIN_CONFIDENCE = 0.3
 MAX_CONFIDENCE = 0.4
 
-PGIE_CONFIG_FILE = "/opt/nvidia/deepstream/deepstream-7.0/sources/apps/configs/config_pgie_yolo_det.txt"
-ANALYTICS_CONFIG_FILE = "/opt/nvidia/deepstream/deepstream-7.0/sources/apps/configs/config_nvdsanalytics.txt"
-TRACKER_CONFIG_FILE = "/opt/nvidia/deepstream/deepstream-7.0/sources/apps/configs/dsnvanalytics_tracker_config.txt"
+PGIE_CONFIG_FILE = "/opt/nvidia/deepstream/deepstream-7.0/sources/apps/inference/configs/config_pgie_yolo_det.txt"
+ANALYTICS_CONFIG_FILE = "/opt/nvidia/deepstream/deepstream-7.0/sources/apps/inference/configs/config_nvdsanalytics.txt"
+TRACKER_CONFIG_FILE = "/opt/nvidia/deepstream/deepstream-7.0/sources/apps/inference/configs/dsnvanalytics_tracker_config.txt"
