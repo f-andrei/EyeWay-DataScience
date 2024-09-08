@@ -1,5 +1,4 @@
 def link_elements(elements, stream_output):
-    print("stream_output", stream_output)
     if stream_output == "none":
         element_probe = elements["pgie"]
         elements["pgie"].link(elements["sink"])

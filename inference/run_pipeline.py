@@ -34,7 +34,6 @@ def parse_args():
         parser.print_help(sys.stderr)
         sys.exit(1)
     args = parser.parse_args()
-    print(vars(args))
     return args
 
 # Function to run the pipeline

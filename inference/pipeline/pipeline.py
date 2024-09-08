@@ -4,6 +4,7 @@ from .element_links import link_elements
 from .elements import get_elements
 from .properties import set_output_properties, set_pgie_properties, set_streammux_properties, set_tiler_properties, set_tracker_properties
 gi.require_version('Gst', '1.0')
+gi.require_version('GstRtspServer', '1.0')
 from gi.repository import Gst, GstRtspServer, GstRtsp # type: ignore
 from common.platform_info import PlatformInfo
 from common.FPS import PERF_DATA
@@ -18,7 +19,6 @@ perf_data = None
 
 
 def cb_newpad(decodebin, decoder_src_pad,data):
-    print("In cb_newpad\n")
     caps=decoder_src_pad.get_current_caps()
     if not caps:
         caps = decoder_src_pad.query_caps()
@@ -29,9 +29,7 @@ def cb_newpad(decodebin, decoder_src_pad,data):
 
     # Need to check if the pad created by the decodebin is for video and not
     # audio.
-    print("gstname=",gstname)
     if(gstname.find("video")!=-1):
-        print("features=",features)
         if features.contains("memory:NVMM"):
             # Get the source bin ghost pad
             bin_ghost_pad=source_bin.get_static_pad("src")
@@ -41,7 +39,6 @@ def cb_newpad(decodebin, decoder_src_pad,data):
             sys.stderr.write(" Error: Decodebin did not pick nvidia decoder plugin.\n")
 
 def decodebin_child_added(child_proxy, Object, name, user_data):
-    print("Decodebin child added:", name, "\n")
     if name.find("decodebin") != -1:
         Object.connect("child-added", decodebin_child_added, user_data)
 
@@ -54,10 +51,7 @@ def decodebin_child_added(child_proxy, Object, name, user_data):
             Object.set_property("drop-on-latency", True)
 
 def create_source_bin(index, uri):
-    print("Creating source bin")
-
     bin_name="source-bin-%02d" %index
-    print(bin_name)
     nbin=Gst.Bin.new(bin_name)
     if not nbin:
         sys.stderr.write(" Unable to create source bin \n")
@@ -134,16 +128,13 @@ def create_pipeline(args):
         elements[name] = element
 
     if platform_info.is_integrated_gpu():
-        print("Creating nv3dsink \n")
         sink = Gst.ElementFactory.make("nv3dsink", "nv3d-sink")
         if not sink:
             sys.stderr.write(" Unable to create nv3dsink \n")
     else:
         if platform_info.is_platform_aarch64():
-            print("Creating nv3dsink \n")
             sink = Gst.ElementFactory.make("nv3dsink", "nv3d-sink")
         else:
-            print("Creating EGLSink \n")
             sink = Gst.ElementFactory.make("nveglglessink", "nvvideo-renderer")
         if not sink:
             sys.stderr.write(" Unable to create egl sink \n")
@@ -177,7 +168,6 @@ def create_pipeline(args):
             #usecases in WSL. Here, nvvidconv1's buffer is used in tiler sink pad probe and cv2 operations are
             #done on that.
             vc_vc_mem_type = int(pyds.NVBUF_MEM_CUDA_PINNED)
-            print("using nvbuf_mem_cuda_pinned memory for nvvidconv1\n", vc_mem_type)
             elements["nvvidconv1"].set_property("nvbuf-memory-type", vc_mem_type)
         else:
             elements["nvvidconv1"].set_property("nvbuf-memory-type", vc_mem_type)
@@ -192,7 +182,6 @@ def create_pipeline(args):
 
 
     for i in range(number_sources):
-        print("Creating source_bin ", i, " \n ")
         uri_name = args.input[i]
         if uri_name.find("rtsp://") == 0:
             is_live = True
