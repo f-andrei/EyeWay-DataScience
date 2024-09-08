@@ -38,3 +38,6 @@ build/
 # Ignore personal configuration files
 config.ini
 secrets.ini
+
+# Ignore model files
+inferece/models/
