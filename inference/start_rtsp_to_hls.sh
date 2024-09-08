@@ -1,3 +1,7 @@
+# check if /stream exists
+if [ ! -d "/opt/nvidia/deepstream/deepstream/sources/apps/stream" ]; then
+  mkdir /opt/nvidia/deepstream/deepstream/sources/apps/stream
+fi
 # Remove old files
 rm -rf /opt/nvidia/deepstream/deepstream/sources/apps/stream/*
 
