@@ -18,8 +18,8 @@
 import sys
 import platform
 from threading import Lock
-from cuda import cudart
-from cuda import cuda
+from cuda import cudart # type: ignore
+from cuda import cuda # type: ignore
 
 guard_platform_info = Lock()
 
@@ -69,7 +69,6 @@ class PlatformInfo:
                             #Get properties from first device
                             property_result, properties = cudart.cudaGetDeviceProperties(0)
                             if property_result == cuda.CUresult.CUDA_SUCCESS:
-                                print("Is it Integrated GPU? :", properties.integrated)
                                 self.is_integrated_gpu_system = properties.integrated
                                 self.is_integrated_gpu_verified = True
                             else:
