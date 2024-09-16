@@ -31,10 +31,16 @@ COPY pyds-1.1.11-py3-none-linux_x86_64.whl /tmp/pyds-1.1.11-py3-none-linux_x86_6
 # Install the pyds library from the local wheel file
 RUN pip3 install /tmp/pyds-1.1.11-py3-none-linux_x86_64.whl cuda-python requests python-dotenv pytubefix flask --ignore-installed
 
-
+# Copy and configure Nginx
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY stream.conf /etc/nginx/sites-available/stream.conf
+RUN ln -s /etc/nginx/sites-available/stream.conf /etc/nginx/sites-enabled/
 
 # Copy your application files
 COPY . /opt/nvidia/deepstream/deepstream/sources/apps
 
 # Set the working directory
 WORKDIR /opt/nvidia/deepstream/deepstream/sources/apps
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
