@@ -5,7 +5,6 @@ gi.require_version('Gst', '1.0')
 from gi.repository import GLib, Gst # type: ignore
 from common.bus_call import bus_call
 from configs.constants import *
-# from pipeline.analytics_probe import nvanalytics_src_pad_buffer_probe
 from pipeline.analytics_probe import nvanalytics_src_pad_buffer_probe
 from pipeline.pipeline import create_pipeline, create_rtsp_server
 def parse_args():
