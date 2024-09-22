@@ -12,17 +12,17 @@ def run_inference(video_source, input_type):
     try:
         print(kill_process())
         print("Checking video frame rate...")
-        frame_rate = get_frame_rate(video_source)
-
-        if frame_rate != 15:
-            base_name, ext = os.path.splitext(video_source)
-            converted_video_source = f"{base_name}_15fps{ext}"
-            if not os.path.exists(converted_video_source):
-                print(f"Converting video to 15 FPS...")
-                video_source = convert_to_15_fps(video_source, converted_video_source)
-                print(f"Finished converting video to 15 FPS: {video_source}")
-
         if input_type == 'video':
+            frame_rate = get_frame_rate(video_source)
+
+            if frame_rate != 15 and not input_type == 'rtsp':
+                base_name, ext = os.path.splitext(video_source)
+                converted_video_source = f"{base_name}_15fps{ext}"
+                if not os.path.exists(converted_video_source):
+                    print(f"Converting video to 15 FPS...")
+                    video_source = convert_to_15_fps(video_source, converted_video_source)
+                    print(f"Finished converting video to 15 FPS: {video_source}")
+            
             path_prefix = "file://"
         elif input_type == 'rtsp':
             path_prefix = ""
@@ -34,7 +34,7 @@ def run_inference(video_source, input_type):
                '-i', video_source, '-o', "rtsp"]
         
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        time.sleep(7)  
+        time.sleep(10)  
 
         stream_dir = "/opt/nvidia/deepstream/deepstream-7.0/sources/apps/inference/stream"
         if not os.path.exists(stream_dir):
@@ -91,8 +91,8 @@ def kill_process():
 def run_inference_api():
     data = request.get_json()
     source = data.get('source')
-    input_type = data.get('input_type')
-    if input_type == 'video':
+    input_type = "rtsp" if source.startswith('rtsp://') else "video"
+    if not source.startswith('rtsp://'):
         source = download_video(source)
 
     stdout, stderr = run_inference(source, input_type)
