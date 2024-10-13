@@ -58,7 +58,7 @@ def set_pgie_properties(elements, number_sources):
 
     return pgie
 
-def set_output_properties(elements, stream_output, number_sources):
+def set_output_properties(elements, stream_output, number_sources, filename):
     if stream_output == "none":
         elements["sink"].set_property('enable-last-sample', 0)
         elements["sink"].set_property('sync', 0)
@@ -80,7 +80,7 @@ def set_output_properties(elements, stream_output, number_sources):
             elements["encoder"].set_property('bitrate', 4097152)
 
             if stream_output == "file":
-                elements["sink"].set_property('location', 'output_file.mp4')
+                elements["sink"].set_property('location', f'{filename}_processed.mp4')
                 elements["sink"].set_property('sync', 1)
             
             if stream_output == "rtsp":

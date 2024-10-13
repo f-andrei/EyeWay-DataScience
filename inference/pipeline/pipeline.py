@@ -179,7 +179,9 @@ def create_pipeline(args):
     streammux = set_streammux_properties(elements)
 
     set_pgie_properties(elements, number_sources)
-    set_output_properties(elements, stream_output, number_sources)
+    filename = args.input[0].split(".")[0].split("/")[-1]
+
+    set_output_properties(elements, stream_output, number_sources, filename)
 
     for element in elements.values():
         pipeline.add(element)
