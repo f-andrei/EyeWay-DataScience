@@ -10,6 +10,7 @@ def get_elements(stream_output):
 
 
     if stream_output == "none":
+        elements["queue"] = ("queue", "queue")
         elements["sink"] = ("fakesink", "fakesink")
 
     if stream_output in ("file", "rtsp", "display"):
