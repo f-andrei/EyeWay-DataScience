@@ -51,24 +51,40 @@ def nvanalytics_src_pad_buffer_probe(pad, info, u_data, perf_data, vehicle_count
                             class_id = obj_meta.class_id
                             obj_id = obj_meta.object_id
                             line_crossing_name = user_meta_data.lcStatus[0].strip()
-                            if line_crossing_name.endswith("moto"):
-                                line_crossing_name = line_crossing_name.split("-")[0]
-                            if class_id == 2 and obj_id not in vehicle_counter["G3"]["Carro"]:
-                                print(f"Contagem carro antes: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Carro'])}")
-                                vehicle_counter[line_crossing_name]["Carro"].add(obj_id)
-                                print(f"Contagem carro depois: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Carro'])}")
-                            elif class_id == 3 and obj_id not in vehicle_counter["G3"]["Moto"]:
-                                print(f"Contagem moto antes: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Moto'])}")                                
-                                vehicle_counter[line_crossing_name]['Moto'].add(obj_id)
-                                print(f"Contagem moto depois: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Moto'])}")
-                            elif class_id == 5:
-                                print(f"Contagem onibus antes: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Onibus'])}")
-                                vehicle_counter[line_crossing_name]["Onibus"].add(obj_id)
-                                print(f"Contagem onibus depois: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Onibus'])}")
-                            elif class_id ==7:
-                                print(f"Contagem caminhao antes: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Caminhao'])}")
-                                vehicle_counter[line_crossing_name]["Caminhao"].add(obj_id)
-                                print(f"Contagem caminhao depois: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Caminhao'])}")
+                            conditions = (
+                                obj_id not in vehicle_counter["G1"]["Carro"],
+                                obj_id not in vehicle_counter["G1"]["Moto"],
+                                obj_id not in vehicle_counter["G1"]["Onibus"],
+                                obj_id not in vehicle_counter["G1"]["Caminhao"],
+                                obj_id not in vehicle_counter["G2"]["Carro"],
+                                obj_id not in vehicle_counter["G2"]["Moto"],
+                                obj_id not in vehicle_counter["G2"]["Onibus"],
+                                obj_id not in vehicle_counter["G2"]["Caminhao"],
+                                obj_id not in vehicle_counter["G3"]["Carro"],
+                                obj_id not in vehicle_counter["G3"]["Moto"],
+                                obj_id not in vehicle_counter["G3"]["Onibus"],
+                                obj_id not in vehicle_counter["G3"]["Caminhao"]
+                                )
+                            
+                            if all(conditions):
+                                if line_crossing_name.endswith("moto"):
+                                    line_crossing_name = line_crossing_name.split("-")[0]
+                                if class_id == 2:
+                                    print(f"Contagem carro antes: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Carro'])}")
+                                    vehicle_counter[line_crossing_name]["Carro"].add(obj_id)
+                                    print(f"Contagem carro depois: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Carro'])}")
+                                elif class_id == 3 and obj_id not in vehicle_counter["G3"]["Moto"]:
+                                    print(f"Contagem moto antes: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Moto'])}")                                
+                                    vehicle_counter[line_crossing_name]['Moto'].add(obj_id)
+                                    print(f"Contagem moto depois: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Moto'])}")
+                                elif class_id == 5:
+                                    print(f"Contagem onibus antes: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Onibus'])}")
+                                    vehicle_counter[line_crossing_name]["Onibus"].add(obj_id)
+                                    print(f"Contagem onibus depois: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Onibus'])}")
+                                elif class_id ==7:
+                                    print(f"Contagem caminhao antes: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Caminhao'])}")
+                                    vehicle_counter[line_crossing_name]["Caminhao"].add(obj_id)
+                                    print(f"Contagem caminhao depois: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Caminhao'])}")
 
 
                             # infraction_type = "Conversao proibida"
