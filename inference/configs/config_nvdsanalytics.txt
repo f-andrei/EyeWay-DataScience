@@ -10,15 +10,18 @@ display-font-size=12
 #Line crossing - <label> = <direction xyxys> <line xyxys>
 [line-crossing-stream-0]
 enable=1
-line-crossing- rightLane1 = 616;460; 558;421; 638;428; 526;452
-line-crossing- leftLane1 = 390;450; 428;503; 350;495; 464;465
-line-crossing- rightLane2 = 1563;563; 1624;521; 1537;521; 1647;571
-line-crossing- leftLane2 = 1415;441; 1332;476; 1313;442; 1432;482
+line-crossing- G1 = 1797;401; 1570;339; 1740;253; 1601;482
+
+
+line-crossing- G2 = 671;278; 598;308; 706;306; 509;305
+
+
+line-crossing- G3 = 233;461; 344;470; 380;371; 211;561
 
 class-id=0;2;3;5;7
 
 
-mode=strict
+mode=balanced
 
 
 
