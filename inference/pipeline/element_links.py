@@ -1,7 +1,12 @@
 def link_elements(elements, stream_output):
     if stream_output == "none":
         element_probe = elements["pgie"]
-        elements["pgie"].link(elements["sink"])
+        elements["streammux"].link(elements["pgie"])
+        elements["pgie"].link(elements["nvvidconv1"])
+        elements["nvvidconv1"].link(elements["filter1"])
+        elements["filter1"].link(elements["nvtracker"])
+        elements["nvtracker"].link(elements["nvdsanalytics"])
+        elements["nvdsanalytics"].link(elements["sink"])
 
     if stream_output in ("file", "rtsp", "display"):
         element_probe = elements["nvtiler"]

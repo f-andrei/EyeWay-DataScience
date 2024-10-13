@@ -42,8 +42,8 @@ def set_tiler_properties(elements, number_sources):
 
 def set_streammux_properties(elements):
     streammux = elements["streammux"]
-    streammux.set_property('width', 1920)
-    streammux.set_property('height', 1080)
+    streammux.set_property('width', 1280)
+    streammux.set_property('height', 720)
     streammux.set_property('batch-size', 1)
     streammux.set_property('batched-push-timeout', MUXER_BATCH_TIMEOUT_USEC)
     # streammux.set_property('nvbuf-memory-type', 2)

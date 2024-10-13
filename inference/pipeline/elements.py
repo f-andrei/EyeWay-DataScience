@@ -6,8 +6,6 @@ def get_elements(stream_output):
             "filter1": ("capsfilter", "filter1"),
             "nvtracker": ("nvtracker", "tracker"),
             "nvdsanalytics": ("nvdsanalytics", "analytics"),
-            # "nvvidconv": ("nvvideoconvert", "convertor"),
-            "nvtiler": ("nvmultistreamtiler", "nvtiler")
         }
 
 
@@ -15,9 +13,7 @@ def get_elements(stream_output):
         elements["sink"] = ("fakesink", "fakesink")
 
     if stream_output in ("file", "rtsp", "display"):
-        # elements["nvvidconv_tiler"] = ("nvvideoconvert", "nvvidconv_tiler")
-        # elements["filter_tiler"] = ("capsfilter", "filter_tiler")
-        # elements["nvtiler"] = ("nvmultistreamtiler", "nvtiler")
+        elements["nvtiler"] = ("nvmultistreamtiler", "nvtiler")
         elements["nvvidconv"] = ("nvvideoconvert", "convertor")
         elements["nvosd"] = ("nvdsosd", "onscreendisplay")
         if stream_output in ("file","rtsp"):
@@ -34,5 +30,6 @@ def get_elements(stream_output):
         else:
             elements["sink"] = ("nveglglessink", "nvvideo-renderer")
 
+    print(elements)
     return elements
     

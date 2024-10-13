@@ -134,12 +134,13 @@ def create_pipeline(args):
     else:
         if platform_info.is_platform_aarch64():
             sink = Gst.ElementFactory.make("nv3dsink", "nv3d-sink")
+        # else:
+        #     sink = Gst.ElementFactory.make("nveglglessink", "nvvideo-renderer")
+        # if not sink:
+        #     sys.stderr.write(" Unable to create egl sink \n")
+
         else:
-            sink = Gst.ElementFactory.make("nveglglessink", "nvvideo-renderer")
-        if not sink:
-            sys.stderr.write(" Unable to create egl sink \n")
-
-
+            sink = Gst.ElementFactory.make("fakesink", "fakesink")
 
     config = configparser.ConfigParser()
     config.read(TRACKER_CONFIG_FILE)
@@ -149,10 +150,11 @@ def create_pipeline(args):
     
     elements["nvdsanalytics"].set_property("config-file", ANALYTICS_CONFIG_FILE)
 
-    tiler = set_tiler_properties(elements, number_sources)
-
+    if stream_output != "none":
+        tiler = set_tiler_properties(elements, number_sources)
+    else:
+        tiler = None
     sink.set_property("qos", 0)
-
     caps1 = Gst.Caps.from_string("video/x-raw(memory:NVMM), format=RGBA")
     elements["filter1"].set_property("caps", caps1)
     if not platform_info.is_integrated_gpu():
@@ -161,7 +163,8 @@ def create_pipeline(args):
         vc_mem_type = int(pyds.NVBUF_MEM_CUDA_PINNED)
         mem_type = int(pyds.NVBUF_MEM_CUDA_UNIFIED)
         elements["streammux"].set_property("nvbuf-memory-type", vc_mem_type)
-        elements["nvvidconv"].set_property("nvbuf-memory-type", mem_type)
+        if stream_output != "none":
+            elements["nvvidconv"].set_property("nvbuf-memory-type", mem_type)
         if platform_info.is_wsl():
             #opencv functions like cv2.line and cv2.putText is not able to access NVBUF_MEM_CUDA_UNIFIED memory
             #in WSL systems due to some reason and gives SEGFAULT. Use NVBUF_MEM_CUDA_PINNED memory for such
@@ -171,7 +174,8 @@ def create_pipeline(args):
             elements["nvvidconv1"].set_property("nvbuf-memory-type", vc_mem_type)
         else:
             elements["nvvidconv1"].set_property("nvbuf-memory-type", vc_mem_type)
-        tiler.set_property("nvbuf-memory-type", vc_mem_type)
+        if stream_output != "none":
+            tiler.set_property("nvbuf-memory-type", vc_mem_type)
     streammux = set_streammux_properties(elements)
 
     set_pgie_properties(elements, number_sources)
