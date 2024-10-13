@@ -12,11 +12,14 @@ display-font-size=12
 enable=1
 line-crossing- G1 = 1797;401; 1570;339; 1740;253; 1601;482
 
+line-crossing- G2 = 233;461; 344;470; 380;371; 211;561
+line-crossing- G2-moto = 387;492; 650;530; 742;326; 429;789
 
-line-crossing- G2 = 671;278; 598;308; 706;306; 509;305
+
+line-crossing- G3 = 671;278; 598;308; 706;306; 509;305
+line-crossing- G3-moto = 610;323; 649;430; 794;320; 483;445
 
 
-line-crossing- G3 = 233;461; 344;470; 380;371; 211;561
 
 class-id=0;2;3;5;7
 
