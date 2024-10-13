@@ -43,33 +43,34 @@ def nvanalytics_src_pad_buffer_probe(pad, info, u_data, perf_data, vehicle_count
             
             # Extract object level meta data from NvDsAnalyticsObjInfo
             while l_user_meta:
-                print("l_user_meta")
                 try:
                     user_meta = pyds.NvDsUserMeta.cast(l_user_meta.data)
                     if user_meta.base_meta.meta_type == pyds.nvds_get_user_meta_type("NVIDIA.DSANALYTICSOBJ.USER_META"):  
                         user_meta_data = pyds.NvDsAnalyticsObjInfo.cast(user_meta.user_meta_data)                  
-                        print("user_meta_data")
                         if user_meta_data.lcStatus:
-                            print("LC")
                             class_id = obj_meta.class_id
                             obj_id = obj_meta.object_id
                             line_crossing_name = user_meta_data.lcStatus[0].strip()
-                            if class_id == 2:
-                                print("aqui")
+                            if line_crossing_name.endswith("moto"):
+                                line_crossing_name = line_crossing_name.split("-")[0]
+                            if class_id == 2 and obj_id not in vehicle_counter["G3"]["Carro"]:
+                                print(f"Contagem carro antes: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Carro'])}")
                                 vehicle_counter[line_crossing_name]["Carro"].add(obj_id)
-                            elif class_id == 3:
-                                print("aqui")
-                                vehicle_counter[line_crossing_name]["Moto"].add(obj_id)
+                                print(f"Contagem carro depois: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Carro'])}")
+                            elif class_id == 3 and obj_id not in vehicle_counter["G3"]["Moto"]:
+                                print(f"Contagem moto antes: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Moto'])}")                                
+                                vehicle_counter[line_crossing_name]['Moto'].add(obj_id)
+                                print(f"Contagem moto depois: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Moto'])}")
                             elif class_id == 5:
-                                print("aqui")
+                                print(f"Contagem onibus antes: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Onibus'])}")
                                 vehicle_counter[line_crossing_name]["Onibus"].add(obj_id)
+                                print(f"Contagem onibus depois: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Onibus'])}")
                             elif class_id ==7:
-                                print("aqui")
+                                print(f"Contagem caminhao antes: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Caminhao'])}")
                                 vehicle_counter[line_crossing_name]["Caminhao"].add(obj_id)
-                            print(vehicle_counter)
-                            print(f"G1: {[(key, len(value)) for key, value in vehicle_counter['G1'].items()]}")
-                            print(f"G2: {[(key, len(value)) for key, value in vehicle_counter['G2'].items()]}")
-                            print(f"G3: {[(key, len(value)) for key, value in vehicle_counter['G3'].items()]}")
+                                print(f"Contagem caminhao depois: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Caminhao'])}")
+
+
                             # infraction_type = "Conversao proibida"
                             # print("Conversão proibida detectada") 
                             # infraction_handler.handle_infraction(gst_buffer, frame_meta, obj_meta, infraction_type)
