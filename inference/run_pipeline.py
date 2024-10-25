@@ -44,7 +44,7 @@ def run_pipeline(args):
         create_rtsp_server()
 
     period = args.input[0].split(".")[0].split("/")[-1].split("_")
-
+    
     pipeline, analytics, perf_data, element_probe = create_pipeline(args)
     if not pipeline:
         sys.stderr.write("Failed to create pipeline\n")
