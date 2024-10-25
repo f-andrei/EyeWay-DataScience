@@ -1,28 +1,44 @@
 [property]
 enable=1
-config-width=1920
-config-height=1080
+config-width=1280
+config-height=720
 osd-mode=2
 display-font-size=12
 
+[roi-filtering-stream-0]
+enable=1
 
+# Left region polygon
+roi-left = 221;432; 289;594; 366;582; 280;420
+
+# Top region polygon
+roi-top = 314;402; 721;364; 770;390; 325;435
+
+# Bottom region polygon
+roi-bottom = 1064;538; 483;638; 442;582; 1002;498
+
+# Right region polygon
+roi-right = 813;382; 1077;525; 1105;493; 878;386
 
 #Line crossing - <label> = <direction xyxys> <line xyxys>
 [line-crossing-stream-0]
 enable=1
-line-crossing- G1 = 1797;401; 1570;339; 1740;253; 1601;482
 
-line-crossing- G2 = 233;461; 344;470; 380;371; 211;561
-line-crossing- G2-moto = 387;492; 650;530; 742;326; 429;789
+# Left side configurations
+line-crossing-left-left = 179;462; 120;469; 148;436; 154;494
+line-crossing-left-right = 132;546; 195;537; 153;496; 168;596
 
+# Right side configurations
+line-crossing-right-left = 1039;405; 975;414; 937;385; 1056;442
+line-crossing-right-right = 1074;465; 1137;445; 1152;482; 1060;429
 
-line-crossing- G3 = 671;278; 598;308; 706;306; 509;305
-line-crossing- G3-moto = 610;323; 649;430; 794;320; 483;445
+# Top side configurations
+line-crossing-top-down = 389;327; 421;375; 313;369; 555;344
+line-crossing-top-up = 601;351; 548;320; 535;347; 675;332
 
-
-
-class-id=0;2;3;5;7
-
+# Bottom side configurations
+line-crossing-bottom-down = 639;601; 723;698; 531;695; 834;611
+line-crossing-bottom-up = 1055;640; 877;507; 1103;551; 805;642
 
 mode=balanced
 
