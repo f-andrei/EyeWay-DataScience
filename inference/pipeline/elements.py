@@ -2,15 +2,15 @@ def get_elements(stream_output):
     elements ={
             "streammux": ("nvstreammux", "Stream-muxer"),
             "pgie": ("nvinfer", "primary-inference"),
-            "nvvidconv1": ("nvvideoconvert", "convertor1"),
-            "filter1": ("capsfilter", "filter1"),
             "nvtracker": ("nvtracker", "tracker"),
             "nvdsanalytics": ("nvdsanalytics", "analytics"),
+            "nvvidconv_analytics": ("nvvideoconvert", "convertor1"),
+            "filter_analytics": ("capsfilter", "filter_analytics"),
+            "queue": ("queue", "queue")
         }
 
 
     if stream_output == "none":
-        elements["queue"] = ("queue", "queue")
         elements["sink"] = ("fakesink", "fakesink")
 
     if stream_output in ("file", "rtsp", "display"):
