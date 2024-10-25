@@ -156,26 +156,7 @@ def create_pipeline(args):
         tiler = None
     sink.set_property("qos", 0)
     caps1 = Gst.Caps.from_string("video/x-raw(memory:NVMM), format=RGBA")
-    elements["filter1"].set_property("caps", caps1)
-    if not platform_info.is_integrated_gpu():
-        # Use CUDA unified memory in the pipeline so frames
-        # can be easily accessed on CPU in Python.
-        vc_mem_type = int(pyds.NVBUF_MEM_CUDA_PINNED)
-        mem_type = int(pyds.NVBUF_MEM_CUDA_UNIFIED)
-        elements["streammux"].set_property("nvbuf-memory-type", vc_mem_type)
-        if stream_output != "none":
-            elements["nvvidconv"].set_property("nvbuf-memory-type", mem_type)
-        if platform_info.is_wsl():
-            #opencv functions like cv2.line and cv2.putText is not able to access NVBUF_MEM_CUDA_UNIFIED memory
-            #in WSL systems due to some reason and gives SEGFAULT. Use NVBUF_MEM_CUDA_PINNED memory for such
-            #usecases in WSL. Here, nvvidconv1's buffer is used in tiler sink pad probe and cv2 operations are
-            #done on that.
-            vc_vc_mem_type = int(pyds.NVBUF_MEM_CUDA_PINNED)
-            elements["nvvidconv1"].set_property("nvbuf-memory-type", vc_mem_type)
-        else:
-            elements["nvvidconv1"].set_property("nvbuf-memory-type", vc_mem_type)
-        if stream_output != "none":
-            tiler.set_property("nvbuf-memory-type", vc_mem_type)
+    elements["filter_analytics"].set_property("caps", caps1)
     streammux = set_streammux_properties(elements)
 
     set_pgie_properties(elements, number_sources)

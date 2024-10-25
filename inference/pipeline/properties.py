@@ -3,6 +3,7 @@ import math
 import gi # type: ignore
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst # type: ignore
+import pyds # type: ignore
 
 def set_tracker_properties(config, elements):
     tracker = elements["nvtracker"]
@@ -36,7 +37,6 @@ def set_tiler_properties(elements, number_sources):
     tiler.set_property("width", TILED_OUTPUT_WIDTH)
     tiler.set_property("height", TILED_OUTPUT_HEIGHT)
 
-
     return tiler
 
 
@@ -55,7 +55,6 @@ def set_pgie_properties(elements, number_sources):
     pgie = elements["pgie"]
     pgie.set_property('config-file-path', PGIE_CONFIG_FILE)
     pgie.set_property("batch-size", number_sources)
-
     return pgie
 
 def set_output_properties(elements, stream_output, number_sources, filename):
@@ -81,7 +80,7 @@ def set_output_properties(elements, stream_output, number_sources, filename):
 
             if stream_output == "file":
                 elements["sink"].set_property('location', f'{filename}_processed.mp4')
-                elements["sink"].set_property('sync', 1)
+                elements["sink"].set_property('sync', 0)
             
             if stream_output == "rtsp":
                 elements["sink"].set_property('host', "127.0.0.1")
