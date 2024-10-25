@@ -3,13 +3,13 @@ from configs.constants import *
 import gi # type: ignore
 gi.require_version('Gst', '1.0') # type: ignore
 from gi.repository import Gst # type: ignore
-import cv2 # type: ignore
-import numpy as np # type: ignore
-from common.platform_info import PlatformInfo
-platform_info = PlatformInfo()
+# import cv2 # type: ignore
+# import numpy as np # type: ignore
+# from common.platform_info import PlatformInfo
+# platform_info = PlatformInfo()
 saved_objects = {}
 from common.send_to_db import InfractionsHandler
-import csv
+# import csv
 
 infraction_handler = InfractionsHandler()
 
@@ -87,9 +87,9 @@ def nvanalytics_src_pad_buffer_probe(pad, info, u_data, perf_data, vehicle_count
                                     print(f"Contagem caminhao depois: {line_crossing_name} {len(vehicle_counter[line_crossing_name]['Caminhao'])}")
 
 
-                            # infraction_type = "Conversao proibida"
-                            # print("Conversão proibida detectada") 
-                            # infraction_handler.handle_infraction(gst_buffer, frame_meta, obj_meta, infraction_type)
+                            infraction_type = "Conversao proibida"
+                            print("Conversão proibida detectada") 
+                            infraction_handler.handle_infraction(gst_buffer, frame_meta, obj_meta, infraction_type)
                 except StopIteration:
                     break
 
