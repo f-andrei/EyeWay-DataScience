@@ -59,12 +59,7 @@ def run_pipeline(args):
     if not element_probe:
         sys.stderr.write("Unable to get src pad\n")
     else:
-        vehicle_counter = {
-            "G1": {"Carro": set(), "Moto": set(), "Onibus": set(), "Caminhao": set()},
-            "G2": {"Carro": set(), "Moto": set(), "Onibus": set(), "Caminhao": set()},
-            "G3": {"Carro": set(), "Moto": set(), "Onibus": set(), "Caminhao": set()},
-        }
-        element_probe.add_probe(Gst.PadProbeType.BUFFER, nvanalytics_src_pad_buffer_probe, 0, perf_data, vehicle_counter)
+        element_probe.add_probe(Gst.PadProbeType.BUFFER, nvanalytics_src_pad_buffer_probe, 0, perf_data)
         GLib.timeout_add(5000, perf_data.perf_print_callback)
 
     print("Starting pipeline\n")
