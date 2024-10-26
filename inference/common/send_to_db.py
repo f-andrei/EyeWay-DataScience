@@ -13,7 +13,8 @@ import cupy as cp # type: ignore
 load_dotenv()
 
 class_names = ["Pessoa","Bicicleta","Carro","Motocicleta","Aviao","Onibus","Trem","Caminhao"]
-API_URL = os.getenv("API_URL", "http://host.docker.internal:3000")
+# API_URL = os.getenv("API_URL", "http://host.docker.internal:3000")
+API_URL = "http://172.26.144.1:3000"
 class InfractionsHandler:
     def __init__(self):
         self.url = os.path.join(API_URL, "infractions")
@@ -25,7 +26,7 @@ class InfractionsHandler:
                 self.saved_objects[obj_meta.object_id] = 1
 
                 frame = self.get_frame(gst_buffer, obj_meta, frame_meta, infraction_type)
-                cv2.imwrite("frame.jpg", frame)
+                frame = draw_bounding_boxes(frame, obj_meta, "Conversao proibida")
                 image_base64 = cv2.imencode('.jpg', frame)[1].tobytes()
                 image_base64 = base64.b64encode(image_base64).decode('utf-8')
 
@@ -33,12 +34,11 @@ class InfractionsHandler:
                     "camera_id": frame_meta.pad_index,
                     "vehicle_type": class_names[obj_meta.class_id],
                     "infraction_type": infraction_type, 
-                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "image_base64": image_base64
                 }
-                # response = requests.post(self.url, json=payload, timeout=2)
-                # return response
-                return True
+                
+                response = requests.post(self.url, json=payload, timeout=2)
+                return response
         except requests.exceptions.Timeout:
             print("Request timed out")
         except requests.exceptions.ConnectionError:
