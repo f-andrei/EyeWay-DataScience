@@ -84,7 +84,7 @@ def create_rtsp_server():
     server.attach(None)
 
     factory = GstRtspServer.RTSPMediaFactory.new()
-    factory.set_protocols(GstRtsp.RTSPLowerTrans.TCP)
+    factory.set_protocols(GstRtsp.RTSPLowerTrans.UDP)
     factory.set_transport_mode(GstRtspServer.RTSPTransportMode.PLAY)
     factory.set_latency(1)
     factory.set_launch(
