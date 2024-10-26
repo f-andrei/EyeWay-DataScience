@@ -1,4 +1,5 @@
 import signal
+import sys
 import time
 from flask import Flask, jsonify, request  # type: ignore
 import subprocess
@@ -7,10 +8,12 @@ from utils.convert_rtsp_to_hls import convert_rtsp_to_hls
 from utils.preprocess_video import get_frame_rate, convert_to_15_fps
 from utils.get_from_yt import find_stream, download_video
 from utils.utils import is_hls_stream_live, kill_inference_process, cleanup_stream_files, is_rtsp_stream_live
-import shutil
+from flask_cors import CORS
 from configs.constants import *
 
+
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/run-inference', methods=['POST'])
 def run_inference_api():
@@ -43,7 +46,6 @@ stream_status = {"hls_live": False}
 
 @app.route('/stream-status', methods=['GET'])
 def get_stream_status():
-    print(stream_status)
     return jsonify(stream_status)
 
 
@@ -52,10 +54,15 @@ def run_inference(source_uri):
     try:
         kill_inference_process()
         print("Running inference...")
-        cmd = ['python3', '/opt/nvidia/deepstream/deepstream-7.0/sources/apps/inference/run_pipeline.py', 
-               '-i', source_uri, '-o', "rtsp"]
-        
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        cmd = [
+            'python3',
+            '-u',  # Unbuffered output
+            '/opt/nvidia/deepstream/deepstream-7.0/sources/apps/inference/run_pipeline.py',
+            '-i', source_uri,
+            '-o', "rtsp"
+        ]
+        process = subprocess.Popen(cmd, stdout=sys.stdout, stderr=sys.stderr)
+        process.communicate()
         
         rtsp_url = "rtsp://user:pass@localhost:8554/live"
         if is_rtsp_stream_live(rtsp_url):

@@ -2,7 +2,7 @@ import shutil
 import subprocess
 import os
 
-def convert_rtsp_to_hls(stream_dir):    
+def convert_rtsp_to_hls(stream_dir, loglevel='quiet'):    
     if not os.path.exists(stream_dir):
         os.makedirs(stream_dir)
 
@@ -17,13 +17,10 @@ def convert_rtsp_to_hls(stream_dir):
             print(f"Failed to delete {file_path}. Reason: {e}")
 
     ffmpeg_cmd = [
-        'ffmpeg', '-rtsp_transport', 'tcp', '-fflags', 'nobuffer', 
-        '-stimeout', '5000000',  # 5 seconds timeout
-        '-i', 'rtsp://user:pass@localhost:8554/live', '-c:v', 'copy', '-c:a', 'copy',
-        '-hls_time', '4',  # 4-second HLS segments for more frequent updates
-        '-hls_list_size', '15', 
-        '-hls_flags', 'delete_segments+program_date_time',
-        '-flush_packets', '1',  # Flush packets immediately to reduce latency
+        'ffmpeg', '-loglevel', loglevel, '-rtsp_transport', 'udp', '-fflags', 'nobuffer', 
+        '-stimeout', '5000000', '-i', 'rtsp://user:pass@localhost:8554/live', 
+        '-c:v', 'copy', '-c:a', 'copy', '-hls_time', '4', '-hls_list_size', '15', 
+        '-hls_flags', 'delete_segments+program_date_time', '-flush_packets', '1', 
         '-start_number', '1', '-f', 'hls', f"{stream_dir}/stream.m3u8"
     ]
     subprocess.Popen(ffmpeg_cmd)
