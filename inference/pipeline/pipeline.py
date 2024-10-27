@@ -103,7 +103,7 @@ def create_rtsp_server():
 # Function to create the pipeline
 def create_pipeline(args):
     stream_output = args.output
-
+    nvdanalytics_config_file = args.config
     global platform_info
     platform_info = PlatformInfo()
     
@@ -148,7 +148,8 @@ def create_pipeline(args):
 
     config, elements = set_tracker_properties(config, elements)
     
-    elements["nvdsanalytics"].set_property("config-file", ANALYTICS_CONFIG_FILE)
+    # elements["nvdsanalytics"].set_property("config-file", ANALYTICS_CONFIG_FILE)
+    elements["nvdsanalytics"].set_property("config-file", nvdanalytics_config_file)
 
     if stream_output != "none":
         tiler = set_tiler_properties(elements, number_sources)

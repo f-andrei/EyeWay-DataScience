@@ -8,7 +8,8 @@ from utils.convert_rtsp_to_hls import convert_rtsp_to_hls
 from utils.preprocess_video import get_frame_rate, convert_to_15_fps
 from utils.get_from_yt import find_stream, download_video
 from utils.utils import is_hls_stream_live, kill_inference_process, cleanup_stream_files, is_rtsp_stream_live
-from flask_cors import CORS
+from utils.generate_line_crossing_conf import generate_nvdsanalytics_config_file
+from flask_cors import CORS # type: ignore
 from configs.constants import *
 
 
@@ -18,14 +19,18 @@ CORS(app)
 @app.route('/run-inference', methods=['POST'])
 def run_inference_api():
     data = request.get_json()
+
+    camera_name = data.get('camera_name')
     source = data.get('source')
-    input_type = data.get('input_type')
-    source_uri = get_source_uri(input_type, source)
+    input_type = data.get('input_type')  
     
+    source_uri = get_source_uri(input_type, source)
+    source_nvdsnalytics_config_file = generate_nvdsanalytics_config_file(camera_name)
+
     if not source:
         return jsonify({'success': False, 'output': 'Error downloading video'}), 500
     
-    stdout, stderr = run_inference(source_uri)
+    stdout, stderr = run_inference(source_uri, source_nvdsnalytics_config_file)
     
     return jsonify({'success': True, 'output': stdout})
 
@@ -49,7 +54,7 @@ def get_stream_status():
     return jsonify(stream_status)
 
 
-def run_inference(source_uri):
+def run_inference(source_uri, nvdsanalytics_config_file):
     global stream_status
     try:
         kill_inference_process()
@@ -59,7 +64,8 @@ def run_inference(source_uri):
             '-u',  # Unbuffered output
             '/opt/nvidia/deepstream/deepstream-7.0/sources/apps/inference/run_pipeline.py',
             '-i', source_uri,
-            '-o', "rtsp"
+            '-o', "rtsp",
+            '-c', nvdsanalytics_config_file
         ]
         process = subprocess.Popen(cmd, stdout=sys.stdout, stderr=sys.stderr)
         process.communicate()
@@ -86,8 +92,9 @@ def run_inference(source_uri):
 
 
 def get_source_uri(input_type, source):
+    print(input_type)
     path_prefix = ""
-    if input_type == "yt_video":
+    if input_type == "youtube_video":
         path_prefix = "file://"
         frame_rate = get_frame_rate(source)
 
@@ -97,9 +104,9 @@ def get_source_uri(input_type, source):
             if not os.path.exists(converted_source):
                 source = convert_to_15_fps(source, converted_source)
 
-    elif input_type in ["yt_stream"]:
+    elif input_type == "youtube_stream":
         source = find_stream(source)
-    elif input_type == "rtsp":
+    elif input_type == "ip_camera":
         path_prefix = ""
 
     source_uri = path_prefix + source

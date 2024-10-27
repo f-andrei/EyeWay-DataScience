@@ -29,6 +29,13 @@ def parse_args():
         help="Output",
         choices=["display", "file", "rtsp", "none"],
     )
+    parser.add_argument(
+        "-c",
+        "--config",
+        default="/opt/nvidia/deepstream/deepstream-7.0/sources/apps/inference/configs/config_nvdsanalytics.txt",
+        help="nvdsnalaytics config file",
+        metavar="URIs",
+    )
 
     # Check input arguments
     if len(sys.argv) == 1:
@@ -78,7 +85,7 @@ def run_pipeline(args):
     finally:
         # Ensure that resources are properly cleaned up
         print("Exiting app\n")
-        write_vehicle_counter_to_csv(vehicle_counter, period)
+        # write_vehicle_counter_to_csv(vehicle_counter, period)
         pipeline.set_state(Gst.State.NULL)
 
 def write_vehicle_counter_to_csv(vehicle_counter, period="6:30-7:00"):

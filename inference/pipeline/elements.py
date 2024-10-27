@@ -30,7 +30,5 @@ def get_elements(stream_output):
                 elements["sink"] = ("udpsink", "udpsink")
         else:
             elements["sink"] = ("nveglglessink", "nvvideo-renderer")
-
-    print(elements)
     return elements
     
