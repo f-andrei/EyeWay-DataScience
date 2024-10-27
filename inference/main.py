@@ -11,6 +11,7 @@ from utils.utils import is_hls_stream_live, kill_inference_process, cleanup_stre
 from utils.generate_line_crossing_conf import generate_nvdsanalytics_config_file
 from flask_cors import CORS # type: ignore
 from configs.constants import *
+import threading
 
 
 app = Flask(__name__)
@@ -68,28 +69,32 @@ def run_inference(source_uri, nvdsanalytics_config_file):
             '-c', nvdsanalytics_config_file
         ]
         process = subprocess.Popen(cmd, stdout=sys.stdout, stderr=sys.stderr)
-        process.communicate()
+        
+        threading.Thread(target=process.communicate).start()
         
         rtsp_url = "rtsp://user:pass@localhost:8554/live"
-        if is_rtsp_stream_live(rtsp_url):
-            convert_rtsp_to_hls(HLS_OUTPUT_PATH)
-            
-            hls_playlist_path = os.path.join(HLS_OUTPUT_PATH, "stream.m3u8")
-            if is_hls_stream_live(hls_playlist_path):
-                stream_status["hls_live"] = True
-                return "Inference started and HLS stream is live", None
+        
+        max_retries = 5
+        for _ in range(max_retries):
+            if is_rtsp_stream_live(rtsp_url):
+                convert_rtsp_to_hls(HLS_OUTPUT_PATH)
+                
+                hls_playlist_path = os.path.join(HLS_OUTPUT_PATH, "stream.m3u8")
+                if is_hls_stream_live(hls_playlist_path):
+                    stream_status["hls_live"] = True
+                    return "Inference started and HLS stream is live", None
+                else:
+                    stream_status["hls_live"] = False
+                    return "Inference started but HLS stream is not live", None
             else:
-                stream_status["hls_live"] = False
-                return "Inference started but HLS stream is not live", None
-        else:
-            stream_status["hls_live"] = False
-            return "Inference started but RTSP stream is not live", None
-
+                time.sleep(5)  
+        
+        stream_status["hls_live"] = False
+        return "Inference started but RTSP stream is not live", None
     except Exception as e:
         print(f"Error during inference: {e}")
         stream_status["hls_live"] = False
         return str(e), None
-
 
 def get_source_uri(input_type, source):
     print(input_type)
