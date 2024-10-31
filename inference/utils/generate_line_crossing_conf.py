@@ -62,9 +62,12 @@ def generate_nvdsanalytics_config_file(camera_name):
                 crossing_points = f"{crossing_line[0]['x']};{crossing_line[0]['y']}; " \
                                 f"{crossing_line[1]['x']};{crossing_line[1]['y']}"
 
+                # Get line type identifier (C for Contagem, P for Conversão proibida)
+                type_id = 'contagem' if pair['type'] == 'Contagem' else 'conversao-proibida'
+
                 # Add line configuration
-                config_content.append(f'# Line crossing {idx}')
-                config_content.append(f'line-crossing-{idx} = {direction_points}; {crossing_points}')
+                config_content.append(f'# Line crossing {idx} - {pair["type"]}')
+                config_content.append(f'line-crossing-{type_id}-{idx} = {direction_points}; {crossing_points}')
                 config_content.append('')
 
         # Add mode at the end
