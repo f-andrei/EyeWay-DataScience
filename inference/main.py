@@ -21,6 +21,7 @@ CORS(app)
 def run_inference_api():
     data = request.get_json()
 
+    camera_id = data.get('camera_id')
     camera_name = data.get('camera_name')
     source = data.get('source')
     input_type = data.get('input_type')  
@@ -31,7 +32,7 @@ def run_inference_api():
     if not source:
         return jsonify({'success': False, 'output': 'Error downloading video'}), 500
     
-    stdout, stderr = run_inference(source_uri, source_nvdsnalytics_config_file)
+    stdout, stderr = run_inference(source_uri, source_nvdsnalytics_config_file, camera_id)
     
     return jsonify({'success': True, 'output': stdout})
 
@@ -55,18 +56,20 @@ def get_stream_status():
     return jsonify(stream_status)
 
 
-def run_inference(source_uri, nvdsanalytics_config_file):
+def run_inference(source_uri, nvdsanalytics_config_file, camera_id):
     global stream_status
     try:
         kill_inference_process()
         print("Running inference...")
+
         cmd = [
             'python3',
             '-u',  # Unbuffered output
             '/opt/nvidia/deepstream/deepstream-7.0/sources/apps/inference/run_pipeline.py',
             '-i', source_uri,
             '-o', "rtsp",
-            '-c', nvdsanalytics_config_file
+            '-c', nvdsanalytics_config_file,
+            '-id', str(camera_id)
         ]
         process = subprocess.Popen(cmd, stdout=sys.stdout, stderr=sys.stderr)
         
@@ -93,6 +96,7 @@ def run_inference(source_uri, nvdsanalytics_config_file):
         return "Inference started but RTSP stream is not live", None
     except Exception as e:
         print(f"Error during inference: {e}")
+        raise e
         stream_status["hls_live"] = False
         return str(e), None
 

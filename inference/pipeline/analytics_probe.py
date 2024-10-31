@@ -11,7 +11,7 @@ from common.send_to_db import InfractionsHandler
 infraction_handler = InfractionsHandler()
 
 
-def nvanalytics_src_pad_buffer_probe(pad, info, u_data, perf_data):
+def nvanalytics_src_pad_buffer_probe(pad, info, u_data, perf_data, camera_id):
     gst_buffer = info.get_buffer()
     if not gst_buffer:
         print("Unable to get GstBuffer ")
@@ -47,10 +47,10 @@ def nvanalytics_src_pad_buffer_probe(pad, info, u_data, perf_data):
                         if user_meta_data.lcStatus:
                             line_crossing_names = user_meta_data.lcStatus
                             for lc in line_crossing_names:
-                                if lc.startswith("conversao_proibida"):
-                                    infraction_type = "Conversao proibida"
+                                if lc.startswith("conversao-proibida") and obj_meta.class_id in [2, 5, 6, 7]:
+                                    infraction_type = "Conversão proibida"
                                     print("Conversão proibida detectada") 
-                                    infraction_handler.handle_infraction(gst_buffer, frame_meta, obj_meta, infraction_type)
+                                    infraction_handler.handle_infraction(gst_buffer, frame_meta, obj_meta, infraction_type, camera_id)
                 except StopIteration:
                     break
 

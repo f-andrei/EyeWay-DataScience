@@ -36,6 +36,14 @@ def parse_args():
         help="nvdsnalaytics config file",
         metavar="URIs",
     )
+    
+    parser.add_argument(
+        "-id",
+        "--camera_id",
+        type=str,
+        default=0,
+        help="Camera ID",
+    )
 
     # Check input arguments
     if len(sys.argv) == 1:
@@ -51,7 +59,7 @@ def run_pipeline(args):
         create_rtsp_server()
 
     period = args.input[0].split(".")[0].split("/")[-1].split("_")
-    
+    camera_id = int(args.camera_id)
     pipeline, analytics, perf_data, element_probe = create_pipeline(args)
     if not pipeline:
         sys.stderr.write("Failed to create pipeline\n")
@@ -66,7 +74,7 @@ def run_pipeline(args):
     if not element_probe:
         sys.stderr.write("Unable to get src pad\n")
     else:
-        element_probe.add_probe(Gst.PadProbeType.BUFFER, nvanalytics_src_pad_buffer_probe, 0, perf_data)
+        element_probe.add_probe(Gst.PadProbeType.BUFFER, nvanalytics_src_pad_buffer_probe, 0, perf_data, camera_id)
         GLib.timeout_add(5000, perf_data.perf_print_callback)
 
     print("Starting pipeline\n")

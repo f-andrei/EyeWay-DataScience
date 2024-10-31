@@ -20,18 +20,18 @@ class InfractionsHandler:
         self.url = os.path.join(API_URL, "infractions")
         self.saved_objects = {}
 
-    def handle_infraction(self, gst_buffer, frame_meta, obj_meta, infraction_type):
+    def handle_infraction(self, gst_buffer, frame_meta, obj_meta, infraction_type, camera_id):
         try:
             if obj_meta.object_id not in self.saved_objects:
                 self.saved_objects[obj_meta.object_id] = 1
 
                 frame = self.get_frame(gst_buffer, obj_meta, frame_meta, infraction_type)
-                frame = draw_bounding_boxes(frame, obj_meta, "Conversao proibida")
+                frame = draw_bounding_boxes(frame, obj_meta)
                 image_base64 = cv2.imencode('.jpg', frame)[1].tobytes()
                 image_base64 = base64.b64encode(image_base64).decode('utf-8')
 
                 payload = {
-                    "camera_id": frame_meta.pad_index,
+                    "camera_id": camera_id,
                     "vehicle_type": class_names[obj_meta.class_id],
                     "infraction_type": infraction_type, 
                     "image_base64": image_base64
