@@ -1,12 +1,10 @@
 # type: ignore
 import cv2
-import pyds
-import numpy as np #
 
-class_names = ["person","bicycle","car","motorbike","aeroplane","bus","train","truck"]
+class_names = ["Pessoa","Bicicleta","Carro","Motocicleta","Aviao","Onibus","Trem","Caminhao"]
 saved_objects = {}
 
-def draw_bounding_boxes(image, obj_meta, text):
+def draw_bounding_boxes(image, obj_meta):
     class_id = obj_meta.class_id
     rect_params = obj_meta.rect_params
     top = int(rect_params.top)
@@ -29,13 +27,7 @@ def draw_bounding_boxes(image, obj_meta, text):
     lineright_c1 = (left + width, top + h_percents)
     lineright_c2 = (left + width, top + height - h_percents)
     image = cv2.line(image, lineright_c1, lineright_c2, color, 6)
-    image = cv2.putText(image,
-                        text,
-                        (left, top - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        1,
-                        (255, 255, 255, 0),
-                        2)
+
     # Note that on some systems cv2.putText erroneously draws horizontal lines across the image
     image = cv2.putText(
         image, 
