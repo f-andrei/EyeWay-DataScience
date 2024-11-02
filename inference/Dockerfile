@@ -29,7 +29,7 @@ RUN bash /opt/nvidia/deepstream/deepstream/user_additional_install.sh
 COPY pyds-1.1.11-py3-none-linux_x86_64.whl /tmp/pyds-1.1.11-py3-none-linux_x86_64.whl
 
 # Install the pyds library from the local wheel file
-RUN pip3 install /tmp/pyds-1.1.11-py3-none-linux_x86_64.whl cuda-python requests python-dotenv pytubefix flask yt_dlp cupy-cuda12x --ignore-installed
+RUN pip3 install /tmp/pyds-1.1.11-py3-none-linux_x86_64.whl cuda-python requests python-dotenv pytubefix flask yt_dlp cupy-cuda12x pillow --ignore-installed
 
 # Copy and configure Nginx
 COPY nginx.conf /etc/nginx/nginx.conf
