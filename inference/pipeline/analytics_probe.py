@@ -6,10 +6,10 @@ from gi.repository import Gst # type: ignore
 from common.platform_info import PlatformInfo
 platform_info = PlatformInfo()
 saved_objects = {}
-from common.send_to_db import InfractionsHandler
+from common.send_to_db import InfractionsHandler, ObjectCounter
 
 infraction_handler = InfractionsHandler()
-
+object_counter = ObjectCounter()
 
 def nvanalytics_src_pad_buffer_probe(pad, info, u_data, perf_data, camera_id):
     gst_buffer = info.get_buffer()
@@ -47,10 +47,13 @@ def nvanalytics_src_pad_buffer_probe(pad, info, u_data, perf_data, camera_id):
                         if user_meta_data.lcStatus:
                             line_crossing_names = user_meta_data.lcStatus
                             for lc in line_crossing_names:
-                                if lc.startswith("conversao-proibida") and obj_meta.class_id in [2, 5, 6, 7]:
+                                if lc.startswith("conversao-proibida") and obj_meta.class_id in [2, 3, 5, 7]:
                                     infraction_type = "Conversão proibida"
                                     print("Conversão proibida detectada") 
                                     infraction_handler.handle_infraction(gst_buffer, frame_meta, obj_meta, infraction_type, camera_id)
+                                if lc.startswith("contagem") and obj_meta.class_id in [0, 1, 2, 3, 5, 7]:
+                                    object_counter.count_objects(obj_meta, camera_id)
+                
                 except StopIteration:
                     break
 

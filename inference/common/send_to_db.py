@@ -13,6 +13,8 @@ import cupy as cp # type: ignore
 load_dotenv()
 
 class_names = ["Pessoa","Bicicleta","Carro","Motocicleta","Aviao","Onibus","Trem","Caminhao"]
+class_names_utf = ["Pessoa","Bicicleta","Carro","Motocicleta","Avião","Ônibus","Trem","Caminhão"]
+
 # API_URL = os.getenv("API_URL", "http://host.docker.internal:3000")
 API_URL = "http://172.26.144.1:3000"
 class InfractionsHandler:
@@ -22,6 +24,7 @@ class InfractionsHandler:
 
     def handle_infraction(self, gst_buffer, frame_meta, obj_meta, infraction_type, camera_id):
         try:
+
             if obj_meta.object_id not in self.saved_objects:
                 self.saved_objects[obj_meta.object_id] = 1
 
@@ -92,3 +95,46 @@ class InfractionsHandler:
         except Exception as e:
             print(f"Error getting frame: {e}")
             return None
+        
+
+class ObjectCounter:
+    def __init__(self):
+        self.url = os.path.join(API_URL, "objects")
+        self.saved_objects = {}
+        self.buffer = []
+        self.last_send_time = datetime.now()
+        
+    def send_buffer(self):
+        if not self.buffer:
+            return
+            
+        try:
+            payload = {
+                "objects": self.buffer
+            }
+            print(f"Pushing {len(self.buffer)} objects to the database")
+            response = requests.post(self.url, json=payload, timeout=2)
+            if response.status_code == 200:
+                self.buffer = []
+        except Exception as e:
+            print(f"Error sending buffer: {e}")
+
+    def count_objects(self, obj_meta, camera_id):
+        try:
+            if obj_meta.object_id not in self.saved_objects:
+                self.saved_objects[obj_meta.object_id] = 1
+                obj_data = {
+                    "camera_id": camera_id,
+                    "class_label": class_names[obj_meta.class_id],
+                    "timestamp": datetime.now().isoformat()
+                }
+                self.buffer.append(obj_data)
+                
+                current_time = datetime.now()
+                if (current_time - self.last_send_time).total_seconds() >= 120:
+                    self.send_buffer()
+                    self.last_send_time = current_time
+                    
+        except Exception as err:
+            print(f"An error occurred: {err}")
+        return None
