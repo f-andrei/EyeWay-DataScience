@@ -46,5 +46,6 @@ assets/
 inference/pyds-1.1.11-py3-none-linux_x86_64.whl
 inference/rtsp.py
 *.jpg
+*.png
 *.mp4
 *_nvdsanalytics.txt
