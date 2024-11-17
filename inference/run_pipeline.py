@@ -5,7 +5,7 @@ import gi # type: ignore
 gi.require_version('Gst', '1.0')
 from gi.repository import GLib, Gst # type: ignore
 from common.bus_call import bus_call
-from configs.constants import *
+from utils.constants import *
 from pipeline.analytics_probe import nvanalytics_src_pad_buffer_probe
 from pipeline.pipeline import create_pipeline, create_rtsp_server
 
@@ -32,7 +32,7 @@ def parse_args():
     parser.add_argument(
         "-c",
         "--config",
-        default="/opt/nvidia/deepstream/deepstream-7.0/sources/apps/inference/configs/config_nvdsanalytics.txt",
+        default="/apps/inference/configs/config_nvdsanalytics.txt",
         help="nvdsnalaytics config file",
         metavar="URIs",
     )

@@ -1,18 +1,16 @@
-import signal
-import sys
-import time
-from flask import Flask, jsonify, request  # type: ignore
-import subprocess
-import os
-from utils.convert_rtsp_to_hls import convert_rtsp_to_hls
-from utils.preprocess_video import get_frame_rate, convert_to_15_fps
-from utils.get_from_yt import find_stream, download_video
+# type: ignore
 from utils.utils import is_hls_stream_live, kill_inference_process, cleanup_stream_files, is_rtsp_stream_live
 from utils.generate_line_crossing_conf import generate_nvdsanalytics_config_file
-from flask_cors import CORS # type: ignore
-from configs.constants import *
+from utils.convert_rtsp_to_hls import convert_rtsp_to_hls
+from flask import Flask, jsonify, request
+from utils.utils import get_source_uri
+from utils.constants import *
+from flask_cors import CORS 
+import subprocess
 import threading
-
+import time
+import sys
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -20,11 +18,12 @@ CORS(app)
 @app.route('/run-inference', methods=['POST'])
 def run_inference_api():
     data = request.get_json()
-
-    camera_id = data.get('camera_id')
-    camera_name = data.get('camera_name')
-    source = data.get('source')
-    input_type = data.get('input_type')  
+    camera_id, camera_name, source, input_type = (
+        data.get('camera_id'),
+        data.get('camera_name'),
+        data.get('source'),
+        data.get('input_type')
+    ) 
     
     source_uri = get_source_uri(input_type, source)
     source_nvdsnalytics_config_file = generate_nvdsanalytics_config_file(camera_name)
@@ -49,8 +48,8 @@ def kill_inference():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-stream_status = {"hls_live": False}
 
+stream_status = {"hls_live": False}
 @app.route('/stream-status', methods=['GET'])
 def get_stream_status():
     return jsonify(stream_status)
@@ -61,11 +60,10 @@ def run_inference(source_uri, nvdsanalytics_config_file, camera_id):
     try:
         kill_inference_process()
         print("Running inference...")
-
         cmd = [
             'python3',
-            '-u',  # Unbuffered output
-            '/opt/nvidia/deepstream/deepstream-7.0/sources/apps/inference/run_pipeline.py',
+            '-u',
+            '/apps/inference/run_pipeline.py',
             '-i', source_uri,
             '-o', "rtsp",
             '-c', nvdsanalytics_config_file,
@@ -96,30 +94,9 @@ def run_inference(source_uri, nvdsanalytics_config_file, camera_id):
         return "Inference started but RTSP stream is not live", None
     except Exception as e:
         print(f"Error during inference: {e}")
-        raise e
         stream_status["hls_live"] = False
         return str(e), None
 
-def get_source_uri(input_type, source):
-    print(input_type)
-    path_prefix = ""
-    if input_type == "youtube_video":
-        path_prefix = "file://"
-        frame_rate = get_frame_rate(source)
-
-        if frame_rate != 15 and not input_type == 'rtsp':
-            base_name, ext = os.path.splitext(source)
-            converted_source = f"{base_name}_15fps{ext}"
-            if not os.path.exists(converted_source):
-                source = convert_to_15_fps(source, converted_source)
-
-    elif input_type == "youtube_stream":
-        source = find_stream(source)
-    elif input_type == "ip_camera":
-        path_prefix = ""
-
-    source_uri = path_prefix + source
-    return source_uri
 
 if __name__ == '__main__':
     app.run(debug=True)

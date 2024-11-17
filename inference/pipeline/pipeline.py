@@ -9,7 +9,7 @@ from gi.repository import Gst, GstRtspServer, GstRtsp # type: ignore
 from common.platform_info import PlatformInfo
 from common.FPS import PERF_DATA
 import configparser
-from configs.constants import *
+from utils.constants import *
 import pyds # type: ignore
 
 

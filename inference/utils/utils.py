@@ -1,8 +1,30 @@
+from utils.get_from_yt import find_stream
+from utils.preprocess_video import get_frame_rate, convert_to_15_fps
 import os
 import shutil
 import signal
 import subprocess
 import time
+
+def get_source_uri(input_type, source):
+    path_prefix = ""
+    if input_type == "youtube_video":
+        path_prefix = "file://"
+        frame_rate = get_frame_rate(source)
+
+        if frame_rate != 15 and not input_type == 'rtsp':
+            base_name, ext = os.path.splitext(source)
+            converted_source = f"{base_name}_15fps{ext}"
+            if not os.path.exists(converted_source):
+                source = convert_to_15_fps(source, converted_source)
+
+    elif input_type == "youtube_stream":
+        source = find_stream(source)
+    elif input_type == "ip_camera":
+        path_prefix = ""
+
+    source_uri = path_prefix + source
+    return source_uri
 
 def is_rtsp_stream_live(rtsp_url, timeout=60):
     start_time = time.time()

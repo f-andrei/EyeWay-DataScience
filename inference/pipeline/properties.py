@@ -1,4 +1,4 @@
-from configs.constants import *
+from utils.constants import *
 import math
 import gi # type: ignore
 gi.require_version('Gst', '1.0')

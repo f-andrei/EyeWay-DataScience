@@ -1,6 +1,7 @@
-import yt_dlp # type: ignore
-from pytubefix import YouTube # type: ignore
-from pytubefix.cli import on_progress # type: ignore
+# type: ignore
+import yt_dlp
+from pytubefix import YouTube
+from pytubefix.cli import on_progress
 import re
 
 ydl_opts = {}
