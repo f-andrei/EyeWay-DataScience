@@ -30,7 +30,6 @@ class InfractionsHandler:
                 img_buffer.seek(0)
                 image_base64 = base64.b64encode(img_buffer.getvalue()).decode('utf-8')
 
-                frame_with_boxes.save("test.png")
                 payload = {
                     "camera_id": camera_id,
                     "vehicle_type": CLASS_NAMES[obj_meta.class_id],
