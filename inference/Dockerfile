@@ -2,7 +2,6 @@
 FROM nvcr.io/nvidia/deepstream:7.0-triton-multiarch
 
 # Set environment variables
-ENV DISPLAY=$DISPLAY
 ENV CUDA_CACHE_DISABLE=0
 
 # Install system dependencies
@@ -29,8 +28,8 @@ RUN apt-get update && apt-get install -y \
 RUN bash /opt/nvidia/deepstream/deepstream/user_additional_install.sh
 
 # Copy and install pyds wheel file
-COPY pyds-1.1.11-py3-none-linux_x86_64.whl /tmp/
-RUN pip3 install /tmp/pyds-1.1.11-py3-none-linux_x86_64.whl \
+COPY pyds-1.2.0-py3-none-linux_x86_64.whl /tmp/
+RUN pip3 install /tmp/pyds-1.2.0-py3-none-linux_x86_64.whl \
     cuda-python \
     requests \
     python-dotenv \
@@ -53,9 +52,9 @@ COPY . /apps
 WORKDIR /apps
 
 # Copy and set up entrypoint script
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY entrypoint.sh entrypoint.sh
+RUN chmod +x entrypoint.sh
 
 # Set the entrypoint script
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["entrypoint.sh"]
 CMD ["/bin/bash"]
